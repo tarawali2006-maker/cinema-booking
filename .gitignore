@@ -1,0 +1,19 @@
+# Build output
+target/
+*.class
+*.jar
+
+# IDE metadata
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local data files (created when the app runs)
+*.dat
