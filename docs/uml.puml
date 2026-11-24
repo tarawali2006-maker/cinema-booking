@@ -1,0 +1,126 @@
+@startuml
+title Cinema Booking System - Class Diagram
+skinparam classAttributeIconSize 0
+
+package model {
+  class Movie {
+    - title : String
+    - genre : String
+    - durationMinutes : int
+    + getTitle() : String
+    + compareTo(other : Movie) : int
+  }
+  class Seat {
+    - row : char
+    - number : int
+    + getCode() : String
+  }
+  class Hall {
+    - name : String
+    - rows : int
+    - seatsPerRow : int
+    - seats : List<Seat>
+    + findSeat(code : String) : Seat
+    + getCapacity() : int
+  }
+  class Screening {
+    - id : int
+    - startTime : LocalDateTime
+    - basePrice : double
+    - bookedSeats : Set<Seat>
+    + reserve(seat : Seat)
+    + release(seat : Seat)
+    + getFreeSeatCount() : int
+    + seatMap() : String
+  }
+  class Customer {
+    - name : String
+    - email : String
+  }
+  class Booking {
+    - id : int
+    - totalPrice : double
+    + getTickets() : List<Ticket>
+  }
+  abstract class Ticket {
+    - seat : Seat
+    + {abstract} getPrice(basePrice : double) : double
+    + {abstract} getTypeName() : String
+  }
+  class RegularTicket
+  class StudentTicket
+  class VipTicket
+}
+
+package pricing {
+  interface PricingStrategy <<Strategy>> {
+    + calculatePrice(t : Ticket, s : Screening) : double
+    + getName() : String
+  }
+  class StandardPricing
+  class WeekendPricing
+  class DiscountDayPricing
+}
+
+package service {
+  class BookingService <<Context>> {
+    - movies : List<Movie>
+    - screenings : List<Screening>
+    - bookings : List<Booking>
+    - pricingStrategy : PricingStrategy
+    + setPricingStrategy(s : PricingStrategy)
+    + book(c : Customer, s : Screening, seats : List<String>, maker) : Booking
+    + cancelBooking(id : int) : boolean
+    + getMoviesSorted() : List<Movie>
+    + getScreeningsSortedByTime() : List<Screening>
+  }
+}
+
+package persistence {
+  interface CinemaRepository {
+    + save(data : CinemaData)
+    + load() : CinemaData
+  }
+  class FileCinemaRepository {
+    - file : Path
+  }
+  class CinemaData
+}
+
+package exception {
+  class SeatAlreadyBookedException
+  class InvalidSeatException
+}
+
+package ui {
+  class ConsoleMenu
+  class Main
+}
+
+Movie ..|> "Comparable<Movie>"
+Ticket <|-- RegularTicket
+Ticket <|-- StudentTicket
+Ticket <|-- VipTicket
+PricingStrategy <|.. StandardPricing
+PricingStrategy <|.. WeekendPricing
+PricingStrategy <|.. DiscountDayPricing
+CinemaRepository <|.. FileCinemaRepository
+SeatAlreadyBookedException --|> Exception
+InvalidSeatException --|> Exception
+
+Hall "1" *-- "1..*" Seat : contains
+Screening "*" --> "1" Movie : shows
+Screening "*" --> "1" Hall : in
+Booking "*" --> "1" Customer : made by
+Booking "*" --> "1" Screening : for
+Booking "1" o-- "1..*" Ticket : has
+Ticket "*" --> "1" Seat : for
+
+BookingService "1" o-- "*" Movie
+BookingService "1" o-- "*" Screening
+BookingService "1" o-- "*" Booking
+BookingService --> "1" PricingStrategy : uses
+ConsoleMenu --> BookingService
+ConsoleMenu --> CinemaRepository
+Main ..> ConsoleMenu : creates
+@enduml

@@ -1,0 +1,85 @@
+digraph UML {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=12, nodesep=0.5, ranksep=0.8, label="Cinema Booking System - Class Diagram", labelloc=t, fontsize=18];
+  node  [shape=plaintext, fontname="Helvetica", fontsize=10];
+  edge  [fontname="Helvetica", fontsize=9];
+
+  subgraph cluster_ui { label="ui"; style=dashed; color=gray50;
+    ConsoleMenu [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#f5f5f5"><tr><td><b>ConsoleMenu</b></td></tr><tr><td align="left" balign="left">- service : BookingService<br/>- repository : CinemaRepository<br/>- scanner : Scanner</td></tr><tr><td align="left" balign="left">+ run() : void<br/>- bookSeats() : void<br/>- changePricing() : void<br/>- readInt(prompt) : int</td></tr></table>>];
+    Main [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#f5f5f5"><tr><td><b>Main</b></td></tr><tr><td align="left">+ main(args) : void</td></tr></table>>];
+  }
+
+  subgraph cluster_service { label="service"; style=dashed; color=gray50;
+    BookingService [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#fff8e1"><tr><td><i>«Context»</i><br/><b>BookingService</b></td></tr><tr><td align="left" balign="left">- movies : List&lt;Movie&gt;<br/>- screenings : List&lt;Screening&gt;<br/>- bookings : List&lt;Booking&gt;<br/>- pricingStrategy : PricingStrategy</td></tr><tr><td align="left" balign="left">+ setPricingStrategy(s) : void<br/>+ book(customer, screening, seatCodes, ticketMaker) : Booking<br/>+ cancelBooking(id) : boolean<br/>+ getMoviesSorted() : List&lt;Movie&gt;<br/>+ getScreeningsSortedByTime() : List&lt;Screening&gt;<br/>+ getScreeningsByFreeSeats() : List&lt;Screening&gt;<br/>+ toData() : CinemaData</td></tr></table>>];
+  }
+
+  subgraph cluster_pricing { label="pricing (Strategy pattern)"; style=dashed; color=gray50;
+    PricingStrategy [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#e3f2fd"><tr><td><i>«interface»</i><br/><b>PricingStrategy</b></td></tr><tr><td align="left" balign="left">+ calculatePrice(t : Ticket, s : Screening) : double<br/>+ getName() : String</td></tr></table>>];
+    StandardPricing [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>StandardPricing</b></td></tr></table>>];
+    WeekendPricing [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>WeekendPricing</b></td></tr></table>>];
+    DiscountDayPricing [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>DiscountDayPricing</b></td></tr></table>>];
+  }
+
+  subgraph cluster_persistence { label="persistence"; style=dashed; color=gray50;
+    CinemaRepository [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#e3f2fd"><tr><td><i>«interface»</i><br/><b>CinemaRepository</b></td></tr><tr><td align="left" balign="left">+ save(data : CinemaData) : void<br/>+ load() : CinemaData</td></tr></table>>];
+    FileCinemaRepository [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>FileCinemaRepository</b></td></tr><tr><td align="left">- file : Path</td></tr></table>>];
+    CinemaData [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>CinemaData</b></td></tr><tr><td align="left" balign="left">- movies : List&lt;Movie&gt;<br/>- screenings : List&lt;Screening&gt;<br/>- bookings : List&lt;Booking&gt;</td></tr></table>>];
+  }
+
+  subgraph cluster_model { label="model"; style=dashed; color=gray50;
+    Movie [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>Movie</b></td></tr><tr><td align="left" balign="left">- title : String<br/>- genre : String<br/>- durationMinutes : int</td></tr><tr><td align="left">+ compareTo(other : Movie) : int</td></tr></table>>];
+    Hall [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>Hall</b></td></tr><tr><td align="left" balign="left">- name : String<br/>- rows : int<br/>- seatsPerRow : int<br/>- seats : List&lt;Seat&gt;</td></tr><tr><td align="left" balign="left">+ findSeat(code : String) : Seat<br/>+ getCapacity() : int</td></tr></table>>];
+    Seat [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>Seat</b></td></tr><tr><td align="left" balign="left">- row : char<br/>- number : int</td></tr><tr><td align="left">+ getCode() : String</td></tr></table>>];
+    Screening [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>Screening</b></td></tr><tr><td align="left" balign="left">- id : int<br/>- startTime : LocalDateTime<br/>- basePrice : double<br/>- bookedSeats : Set&lt;Seat&gt;</td></tr><tr><td align="left" balign="left">+ reserve(seat : Seat) : void<br/>+ release(seat : Seat) : void<br/>+ getFreeSeatCount() : int<br/>+ seatMap() : String</td></tr></table>>];
+    Customer [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>Customer</b></td></tr><tr><td align="left" balign="left">- name : String<br/>- email : String</td></tr></table>>];
+    Booking [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>Booking</b></td></tr><tr><td align="left" balign="left">- id : int<br/>- totalPrice : double</td></tr><tr><td align="left">+ getTickets() : List&lt;Ticket&gt;</td></tr></table>>];
+    Ticket [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#e8f5e9"><tr><td><i>«abstract»</i><br/><b><i>Ticket</i></b></td></tr><tr><td align="left">- seat : Seat</td></tr><tr><td align="left" balign="left"><i>+ getPrice(basePrice : double) : double</i><br/><i>+ getTypeName() : String</i></td></tr></table>>];
+    RegularTicket [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>RegularTicket</b></td></tr></table>>];
+    StudentTicket [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>StudentTicket</b></td></tr></table>>];
+    VipTicket [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>VipTicket</b></td></tr></table>>];
+  }
+
+  subgraph cluster_exception { label="exception"; style=dashed; color=gray50;
+    SeatAlreadyBookedException [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#ffebee"><tr><td><b>SeatAlreadyBookedException</b></td></tr></table>>];
+    InvalidSeatException [label=<<table border="1" cellborder="0" cellspacing="0" bgcolor="#ffebee"><tr><td><b>InvalidSeatException</b></td></tr></table>>];
+  }
+  Exception [label=<<table border="1" cellborder="0" cellspacing="0"><tr><td><b>java.lang.Exception</b></td></tr></table>>];
+
+  // Inheritance (solid line, hollow triangle)
+  edge [arrowhead=empty, style=solid];
+  RegularTicket -> Ticket; StudentTicket -> Ticket; VipTicket -> Ticket;
+  SeatAlreadyBookedException -> Exception; InvalidSeatException -> Exception;
+
+  // Realization (dashed line, hollow triangle)
+  edge [arrowhead=empty, style=dashed];
+  StandardPricing -> PricingStrategy; WeekendPricing -> PricingStrategy; DiscountDayPricing -> PricingStrategy;
+  FileCinemaRepository -> CinemaRepository;
+
+  // Composition (filled diamond at owner)
+  edge [style=solid, arrowhead=none, arrowtail=diamond, dir=back];
+  Hall -> Seat [taillabel="1", headlabel="1..*", label=" contains"];
+
+  // Aggregation (hollow diamond at owner)
+  edge [style=solid, arrowhead=none, arrowtail=odiamond, dir=back];
+  Booking -> Ticket [taillabel="1", headlabel="1..*", label=" has"];
+  BookingService -> Movie [taillabel="1", headlabel="*"];
+  BookingService -> Screening [taillabel="1", headlabel="*"];
+  BookingService -> Booking [taillabel="1", headlabel="*"];
+
+  // Association (navigable arrow)
+  edge [style=solid, arrowhead=vee, arrowtail=none, dir=forward];
+  Screening -> Movie [taillabel="*", headlabel="1", label=" shows"];
+  Screening -> Hall [taillabel="*", headlabel="1", label=" in"];
+  Booking -> Customer [taillabel="*", headlabel="1", label=" made by"];
+  Booking -> Screening [taillabel="*", headlabel="1", label=" for"];
+  Ticket -> Seat [taillabel="*", headlabel="1", label=" for"];
+  BookingService -> PricingStrategy [headlabel="1", label=" uses"];
+  ConsoleMenu -> BookingService [headlabel="1"];
+  ConsoleMenu -> CinemaRepository [headlabel="1"];
+
+  // Dependency (dashed arrow)
+  edge [style=dashed, arrowhead=vee];
+  Main -> ConsoleMenu [label=" «creates»"];
+  Screening -> SeatAlreadyBookedException [label=" «throws»"];
+  Hall -> InvalidSeatException [label=" «throws»"];
+  FileCinemaRepository -> CinemaData [label=" «saves»"];
+}
